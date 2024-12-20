@@ -1,0 +1,93 @@
+/* APH306 Final Report */
+
+/* Import the data */
+proc import datafile="/home/u63515878/Database.xlsx" 
+    out=health_data
+    dbms=xlsx 
+    replace;
+    getnames=yes;
+run;
+
+/* Data Processing */
+data health;
+    set health_data;
+    MWDPree = input(MWDPre, best32.);
+run;
+
+/* Check for missing values */
+proc means data=health nmiss n;
+    var _numeric_;
+run;
+
+proc freq data=health;
+    tables _character_ / missing;
+run;
+
+/* Descriptive Statistics */
+proc freq data=health;
+    tables Sex*group Smoking*group Alcholdrinking*group / chisq; 
+run;
+
+proc means data=health n mean std min max;
+    class group; /* group: 1 = intervention, 0 = control */
+    var Age Height Bodyweight BMI Sedentarytime 
+        TUGTPre TUGTPost KEMSPre KEMSPost MWDPree MWDPost;
+run;
+
+
+proc sgpanel data=health;
+    panelby group;
+    vbox TUGTPre / category=group;
+    vbox TUGTPost / category=group;
+    rowaxis label="Timed Up-and-Go Test (seconds)"; 
+    colaxis label="Group"; 
+    title "Timed Up-and-Go Test (TUGT) Comparison by Group";
+run;
+
+proc sgpanel data=health;
+    panelby group;
+    vbox KEMSPre / category=group;
+    vbox KEMSPost / category=group;
+    rowaxis label="Knee Extensor Muscle Strength (kilogram)"; 
+    colaxis label="Group"; 
+    title "Knee Extensor Muscle Strength (KEMS) Comparison by Group";
+run;
+
+proc sgpanel data=health;
+    panelby group;
+    vbox MWDPree / category=group;
+    vbox MWDPost / category=group;
+    rowaxis label="6-min Walk Distance (meter)"; 
+    colaxis label="Group"; 
+    title "6-min Walk Distance (6MWD) Comparison by Group";
+run;
+
+
+/* Correlation Analysis */
+proc corr data=health nosimple;
+    var TUGTPre KEMSPre MWDPree;
+    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking;
+run;
+
+proc corr data=health nosimple;
+    var TUGTPost KEMSPost MWDPost;
+    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking;
+run;
+
+
+/* Multivariate Regression Analysis with Baseline Adjustment */
+proc glm data=health;
+    class group;
+    model TUGTPost = TUGTPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+run;
+
+proc glm data=health;
+    class group;
+    model KEMSPost = KEMSPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+run;
+
+proc glm data=health;
+    class group;
+    model MWDPost = MWDPree Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+run;
+
