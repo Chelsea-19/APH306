@@ -30,7 +30,7 @@ run;
 
 proc means data=health n mean std min max;
     class group; /* group: 1 = intervention, 0 = control */
-    var Age Height Bodyweight BMI Sedentarytime 
+    var Age Height Bodyweight BMI Sedentarytime Habit
         TUGTPre TUGTPost KEMSPre KEMSPost MWDPree MWDPost;
 run;
 
@@ -66,28 +66,27 @@ run;
 /* Correlation Analysis */
 proc corr data=health nosimple;
     var TUGTPre KEMSPre MWDPree;
-    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking;
+    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking Habit;
 run;
 
 proc corr data=health nosimple;
     var TUGTPost KEMSPost MWDPost;
-    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking;
+    with Sex Age Height Bodyweight BMI Smoking Alcholdrinking Habit;
 run;
 
 
 /* Multivariate Regression Analysis with Baseline Adjustment */
 proc glm data=health;
     class group;
-    model TUGTPost = TUGTPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+    model TUGTPost = TUGTPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking Habit;
 run;
 
 proc glm data=health;
     class group;
-    model KEMSPost = KEMSPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+    model KEMSPost = KEMSPre Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking Habit;
 run;
 
 proc glm data=health;
     class group;
-    model MWDPost = MWDPree Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking;
+    model MWDPost = MWDPree Sex Age Height Bodyweight BMI Sedentarytime Smoking Alcholdrinking Habit;
 run;
-
